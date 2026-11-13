@@ -103,30 +103,69 @@ final class StudentRepository
         return $student;
     }
 
+
     public function updateStudent(int $id, array $data): ?array
     {
+        // API fields mapped to database columns
+        $allowedFields = [
+            'fullName' => 'full_name',
+            'email' => 'email',
+            'phone' => 'phone',
+            'age' => 'age',
+            'gradeClass' => 'grade_class'
+        ];
+
+        $setParts = [];
+        $params = [];
+
+        foreach ($data as $field => $value) {
+
+            if (!array_key_exists($field, $allowedFields)) {
+                throw new \InvalidArgumentException(
+                    "Invalid field: $field"
+                );
+            }
+
+            $column = $allowedFields[$field];
+
+            $setParts[] = "$column = :$column";
+            $params[$column] = $value;
+        }
+
+        if (empty($setParts)) {
+            throw new \InvalidArgumentException(
+                "No fields provided for update"
+            );
+        }
+
         $sql = "
-              update students
-                set
-                full_name=:fullName,
-                email=:email,
-                phone=:phone,
-                age=:age,
-                grade_class=:gradeClass,
-                updated_at=NOW()
-             where id=:id
-           returning * ";
+        UPDATE students
+        SET " . implode(', ', $setParts) . ",
+            updated_at = NOW()
+        WHERE id = :id
+        RETURNING *
+    ";
+
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([
-            'id' => $id,
-            'fullName' => $data['fullName'],
-            'email' => $data['email'],
-            'phone' => $data['phone'],
-            'age' => $data['age'],
-            'gradeClass' => $data['gradeClass'],
-        ]);
-        $students = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $students ?: null;
+
+        foreach ($params as $column => $value) {
+
+            $type = $value === null
+                ? PDO::PARAM_NULL
+                : ($column === 'age'
+                    ? PDO::PARAM_INT
+                    : PDO::PARAM_STR);
+
+            $stmt->bindValue(":$column", $value, $type);
+        }
+
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        $student = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $student ?: null;
     }
     public function deleteStudent(int $id): ?array
     {

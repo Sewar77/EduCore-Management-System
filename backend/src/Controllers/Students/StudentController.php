@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 namespace App\Controllers\Students;
-
+use App\Services\Students\StudentService;
 use App\Repositories\Students\StudentRepository;
 use App\Validators\Students\StudentValidator;
 use App\Support\JsonResponse;
@@ -12,7 +12,9 @@ use PDOException;
 final class StudentController
 {
     public function __construct(
-        private StudentRepository $students
+        private StudentRepository $students,
+        private StudentService $studentService
+
     ) {
     }
 
@@ -63,7 +65,7 @@ final class StudentController
         }
 
         try {
-            $student = $this->students->createStudent($data);
+            $student = $this->studentService->createStudent($data);
         } catch (PDOException $e) {
             if ((string) $e->getCode() === '23505') {
                 JsonResponse::send(409, [
@@ -101,7 +103,7 @@ final class StudentController
         }
 
         try {
-            $student = $this->students->updateStudent($id, $data);
+            $student = $this->studentService->updateStudent($id, $data);
         } catch (PDOException $e) {
             if ((string) $e->getCode() === '23505') {
                 JsonResponse::send(409, [
@@ -129,7 +131,7 @@ final class StudentController
     // DELETE /api/students/{id}
     public function destroy(int $id): void
     {
-        $student = $this->students->deleteStudent($id);
+        $student = $this->studentService->deleteStudent($id);
         if ($student === null) {
             JsonResponse::send(404, [
                 'success' => false,
