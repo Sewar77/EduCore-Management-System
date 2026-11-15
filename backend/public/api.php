@@ -1,9 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
-// ==========================================
-// IMPORTS
-// ==========================================
+// Development only
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
 
 // Database
 use App\Database\Connection;
@@ -18,6 +20,7 @@ use App\Repositories\Logs\ActivityLogRepository;
 use App\Services\Students\StudentService;
 use App\Services\Teachers\TeacherService;
 use App\Services\Subjects\SubjectService;
+
 // Controllers
 use App\Controllers\Students\StudentController;
 use App\Controllers\Teachers\TeacherController;
@@ -26,25 +29,25 @@ use App\Controllers\Subjects\SubjectController;
 // Support
 use App\Support\JsonResponse;
 
-
-// ==========================================
-// 1. LOAD RESPONSE HELPER
-// ==========================================
-
-require_once __DIR__ . '/../src/Support/JsonResponse.php';
-// ==========================================
-// 2. CORS CONFIGURATION
-// ==========================================
-
+// CORS
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
 header('Vary: Origin');
+header('Content-Type: application/json; charset=utf-8');
 
 if ($origin === 'http://localhost:5173') {
     header('Access-Control-Allow-Origin: http://localhost:5173');
-    header('Access-Control-Allow-Methods: GET, POST, PATCH, DELETE, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type');
+    header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization');
 }
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code($origin === 'http://localhost:5173' ? 204 : 403);
+    exit;
+}
+
+// Load response helper
+require_once __DIR__ . '/../src/Support/JsonResponse.php';
 
 
 // ==========================================
@@ -374,6 +377,37 @@ try {
                 $teacherController->destroy($id);
             }
         }
+    }
+
+    // ==========================================
+// ACTIVITY LOGS
+// GET /api/logs
+// ==========================================
+
+    if ($path === '/api/logs') {
+
+        if ($method !== 'GET') {
+            header('Allow: GET');
+
+            JsonResponse::send(405, [
+                'success' => false,
+                'message' => 'Method not allowed'
+            ]);
+            exit;
+        }
+
+        require_once __DIR__ . '/../src/Database/Connection.php';
+        require_once __DIR__ . '/../src/Repositories/Logs/ActivityLogRepository.php';
+
+        $pdo = Connection::make();
+
+        $logsRepository = new ActivityLogRepository($pdo);
+
+        JsonResponse::send(200, [
+            'success' => true,
+            'data' => $logsRepository->all()
+        ]);
+        exit;
     }
 
 

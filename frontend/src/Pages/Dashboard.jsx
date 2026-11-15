@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 import {
   Box,
   Chip,
@@ -10,6 +9,7 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
+
 import {
   MenuBookOutlined,
   People,
@@ -42,22 +42,19 @@ const tabs = [
     description: "View changes made to records in the system.",
   },
 ];
-
+import StudentsPanel from "../Features/Students/StudentsPanel";
+import SubjectsPanel from "../Features/Subjects/SubjectsPanel";
+import TeachersPanel from "../Features/Teachers/TeachersPanel";
+import LogsPanel from "../Features/Logs/LogsPanel";
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState(0);
-
+  const [activeTab, setActiveTab] = useState(1);
+  console.log(activeTab);
   const currentTab = tabs[activeTab];
 
   return (
     <Box sx={{ minHeight: "100vh", py: { xs: 3, md: 6 } }}>
       <Container maxWidth="xl">
-        {/* Header */}
-        <Stack
-          sx={{
-            gap: 1,
-            mb: 4,
-          }}
-        >
+        <Stack spacing={1} sx={{ mb: 4 }}>
           <Chip
             label="Management Dashboard"
             color="primary"
@@ -65,7 +62,7 @@ export default function DashboardPage() {
             sx={{ width: "fit-content" }}
           />
 
-          <Typography component="h1" variant="h4" sx={{ fontWeight: 800 }}>
+          <Typography variant="h4" component="h1" fontWeight={800}>
             EduCore
           </Typography>
 
@@ -74,7 +71,6 @@ export default function DashboardPage() {
           </Typography>
         </Stack>
 
-        {/* Main content */}
         <Paper
           sx={{
             border: "1px solid",
@@ -83,48 +79,34 @@ export default function DashboardPage() {
             overflow: "hidden",
           }}
         >
-          {/* Tabs */}
           <Box
             sx={{
-              borderBottom: "1px solid",
+              borderBottom: 1,
               borderColor: "divider",
               px: { xs: 1, md: 3 },
             }}
           >
             <Tabs
               value={activeTab}
-              onChange={(_, newValue) => {
-                setActiveTab(newValue);
-              }}
+              onChange={(_, value) => setActiveTab(value)}
               variant="scrollable"
               scrollButtons="auto"
             >
-              {tabs.map((tab, index) => (
+              {tabs.map((tab) => (
                 <Tab
                   key={tab.label}
-                  id={`educore-tab-${index}`}
-                  aria-controls={`educore-panel-${index}`}
+                  label={tab.label}
                   icon={tab.icon}
                   iconPosition="start"
-                  label={tab.label}
                   sx={{ textTransform: "none", minHeight: 68 }}
                 />
               ))}
             </Tabs>
           </Box>
 
-          {/* Active tab content */}
-          <Box
-            role="tabpanel"
-            id={`educore-panel-${activeTab}`}
-            aria-labelledby={`educore-tab-${activeTab}`}
-            sx={{
-              p: { xs: 2, md: 4 },
-              minHeight: 350,
-            }}
-          >
-            <Stack sx={{ gap: 1, mb: 4 }}>
-              <Typography variant="h5" sx={{ fontWeight: 700 }}>
+          <Box sx={{ p: { xs: 2, md: 4 }, minHeight: 350 }}>
+            <Stack spacing={1} sx={{ mb: 3 }}>
+              <Typography variant="h5" fontWeight={700}>
                 {currentTab.title}
               </Typography>
 
@@ -133,19 +115,10 @@ export default function DashboardPage() {
               </Typography>
             </Stack>
 
-            <Box
-              sx={{
-                border: "1px dashed",
-                borderColor: "divider",
-                borderRadius: 3,
-                p: 5,
-                textAlign: "center",
-              }}
-            >
-              <Typography color="text.secondary">
-                {currentTab.label} content will appear here.
-              </Typography>
-            </Box>
+            {activeTab === 0 && <SubjectsPanel />}
+            {activeTab === 1 && <StudentsPanel />}
+            {activeTab === 2 && <TeachersPanel />}
+            {activeTab === 3 && <LogsPanel />}
           </Box>
         </Paper>
       </Container>

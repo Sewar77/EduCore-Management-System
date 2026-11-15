@@ -53,4 +53,17 @@ final class ActivityLogRepository
         );
         $stmt->execute();
     }
+
+    public function all(): array
+    {
+        $stmt = $this->pdo->query("
+        SELECT id, action_type, entity_type,
+               record_id, description, created_at
+        FROM activity_logs
+        ORDER BY created_at DESC, id DESC
+    ");
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }
