@@ -48,7 +48,6 @@ import TeachersPanel from "../Features/Teachers/TeachersPanel";
 import LogsPanel from "../Features/Logs/LogsPanel";
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState(1);
-  console.log(activeTab);
   const currentTab = tabs[activeTab];
 
   return (

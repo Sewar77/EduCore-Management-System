@@ -50,7 +50,7 @@ const getErrorMessage = (error) =>
 
 export default function TeachersPanel() {
   const { data: teachers = [], isPending, error } = useTeachers();
-
+  console.log(teachers);
   const {
     data: subjects = [],
     isPending: subjectsLoading,

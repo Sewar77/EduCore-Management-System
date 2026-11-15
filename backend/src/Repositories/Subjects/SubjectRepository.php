@@ -15,7 +15,7 @@ final class SubjectRepository
     public function all(): array
     {
         $sql = "
-            SELECT id, name, code
+            SELECT id, name, code, description
             FROM subjects
             ORDER BY name ASC
         ";
